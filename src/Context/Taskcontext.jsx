@@ -13,11 +13,13 @@ const authHeaders = () => ({
 
 export function TaskProvider({ children }) {
   const [tasks, setTasks] = useState([])
+  const [trashedTasks, setTrashedTasks] = useState([])
   const [loading, setLoading] = useState(false)
+  const [trashLoading, setTrashLoading] = useState(false)
   const [error, setError] = useState(null)
 
   const fetchTasks = useCallback(async () => {
-    if (!getToken()) return          // not logged in — skip
+    if (!getToken()) return          
     setLoading(true)
     setError(null)
     try {
@@ -30,6 +32,23 @@ export function TaskProvider({ children }) {
       setError(err.message)
     } finally {
       setLoading(false)
+    }
+  }, [])
+
+  const fetchTrashedTasks = useCallback(async () => {
+    if (!getToken()) return          
+    setTrashLoading(true)
+    //setError(null)
+    try {
+      const res = await fetch(`${API_BASE}/trash`, { headers: authHeaders() })
+      if (res.status === 401) { setTrashedTasks([]); return }
+      if (!res.ok) throw new Error('Failed to fetch trashed tasks')
+      const data = await res.json()
+      setTrashedTasks(data)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setTrashLoading(false)
     }
   }, [])
 
@@ -75,21 +94,34 @@ export function TaskProvider({ children }) {
     return updated
   }
 
+   // Soft delete — moves to trash
   const deleteTask = async (id) => {
-    setError(null)
-    const res = await fetch(`${API_BASE}/${id}`, {
-      method: 'DELETE',
-      headers: authHeaders(),
-    })
-    if (!res.ok) throw new Error('Failed to delete task')
+    const res = await fetch(`${API_BASE}/${id}`, { method: 'DELETE', headers: authHeaders() })
+    if (!res.ok) throw new Error('Failed to move task to trash')
+    const { task } = await res.json()
     setTasks(prev => prev.filter(t => t._id !== id))
+    setTrashedTasks(prev => [task, ...prev])
   }
+
+
+
+  // Restore from trash
+  const restoreTask = async (id) => {
+    const res = await fetch(`${API_BASE}/trash/${id}/restore`, { method: 'PUT', headers: authHeaders() })
+    if (!res.ok) throw new Error('Failed to restore task')
+    const { task } = await res.json()
+    setTrashedTasks(prev => prev.filter(t => t._id !== id))
+    setTasks(prev => [task, ...prev])
+  }
+
+
+  
 
   // Called after login so tasks load immediately without a page refresh
   const reloadTasks = () => fetchTasks()
 
   return (
-    <TaskContext.Provider value={{ tasks, loading, error, addTask, editTask, deleteTask, fetchTasks, reloadTasks }}>
+    <TaskContext.Provider value={{ tasks, loading, error, addTask, editTask, deleteTask, fetchTasks, reloadTasks, restoreTask, trashedTasks, trashLoading, fetchTrashedTasks }}>
       {children}
     </TaskContext.Provider>
   )

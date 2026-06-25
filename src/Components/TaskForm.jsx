@@ -43,7 +43,7 @@ export default function TaskForm() {
         <h1 className="text-2xl font-bold">New Task</h1>
       </div>
 
-      <div className="relative border-2 border-gray-200 rounded-xl px-4 pt-5 pb-3 mb-5 bg-white focus-within:border-violet-400 transition">
+      <div className="relative border-2 border-gray-200 rounded-xl px-4 pt-5 pb-3 mb-5 bg-white focus-within:border-[#974FD0] transition">
         <span className="absolute -top-2.5 left-3 bg-white px-1 text-xs font-semibold text-gray-400">Task Title</span>
         <input
           type="text"
