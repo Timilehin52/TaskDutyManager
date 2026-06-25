@@ -9,6 +9,7 @@ import TaskForm from './Components/TaskForm'
 import Login from './Pages/Login'
 import Signup from './Pages/Signup'
 import ProtectedRoute from './Components/ProtectedRoute'
+import TaskTrash from './Pages/TaskTrash'
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path='/newtask' element={<ProtectedRoute><NewTask /></ProtectedRoute>} />
         <Route path='/taskform' element={<ProtectedRoute><TaskForm /></ProtectedRoute>} />
         <Route path='/mytask' element={<ProtectedRoute><MyTasks /></ProtectedRoute>} />
+        <Route path='/trash' element={<ProtectedRoute><TaskTrash /></ProtectedRoute>} />
 
         
         <Route path='*' element={<Navigate to="/" replace />} />
